@@ -1,52 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Text, Box } from '@react-three/drei';
-import * as THREE from 'three';
-
-interface NumberBallProps {
-  number: number;
-  isActive: boolean;
-  position: [number, number, number];
-}
-
-const NumberBall: React.FC<NumberBallProps> = ({ number, isActive, position }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (meshRef.current && isActive) {
-      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 2) * 0.1;
-      meshRef.current.rotation.y += 0.02;
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 3) * 0.2;
-    }
-  });
-
-  return (
-    <group position={position}>
-      <Box
-        ref={meshRef}
-        args={[1.5, 1.5, 1.5]}
-        rotation={[0, 0, 0]}
-      >
-        <meshStandardMaterial
-          color={isActive ? "#FFD700" : "#8B4513"}
-          metalness={0.3}
-          roughness={0.2}
-          emissive={isActive ? "#FFB347" : "#000000"}
-          emissiveIntensity={isActive ? 0.3 : 0}
-        />
-      </Box>
-      <Text
-        position={[0, 0, 0.8]}
-        fontSize={0.6}
-        color={isActive ? "#000000" : "#FFFFFF"}
-        anchorX="center"
-        anchorY="middle"
-      >
-        {number.toString()}
-      </Text>
-    </group>
-  );
-};
+import React, { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 interface NumberPicker3DProps {
   currentNumber: number | null;
@@ -61,40 +14,85 @@ export const NumberPicker3D: React.FC<NumberPicker3DProps> = ({
   isPickingEnabled,
   calledNumbers
 }) => {
-  const [rotationSpeed, setRotationSpeed] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     if (currentNumber) {
-      setRotationSpeed(0.1);
-      const timer = setTimeout(() => setRotationSpeed(0), 2000);
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 2000);
       return () => clearTimeout(timer);
     }
   }, [currentNumber]);
 
+  // Generate some decorative numbers for visual effect
+  const decorativeNumbers = Array.from({ length: 12 }, (_, i) => {
+    const number = Math.floor(Math.random() * 90) + 1;
+    const angle = (i / 12) * 360;
+    return { number, angle, delay: i * 0.1 };
+  });
+
   return (
     <div className="relative">
-      <div className="h-96 w-full bg-gradient-to-br from-muted/20 to-background rounded-lg overflow-hidden border border-border">
-        <Canvas camera={{ position: [0, 0, 8], fov: 50 }}>
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} intensity={1} color="#FFD700" />
-          <pointLight position={[-10, -10, -10]} intensity={0.5} color="#FF6B35" />
-          
-          <Scene 
-            currentNumber={currentNumber} 
-            rotationSpeed={rotationSpeed}
-            calledNumbers={calledNumbers}
-          />
-        </Canvas>
+      <div className="h-96 w-full bg-gradient-to-br from-muted/20 to-background rounded-lg overflow-hidden border border-border relative">
+        {/* Decorative Background Numbers */}
+        <div className="absolute inset-0 overflow-hidden">
+          {decorativeNumbers.map((item, index) => (
+            <div
+              key={index}
+              className={cn(
+                "absolute w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold",
+                "bg-tambola-cell border border-tambola-border text-muted-foreground",
+                "transition-all duration-1000",
+                calledNumbers.has(item.number) ? "bg-tambola-called text-white" : "",
+                isAnimating && "animate-spin"
+              )}
+              style={{
+                left: `${50 + 35 * Math.cos((item.angle * Math.PI) / 180)}%`,
+                top: `${50 + 35 * Math.sin((item.angle * Math.PI) / 180)}%`,
+                transform: 'translate(-50%, -50%)',
+                animationDelay: `${item.delay}s`
+              }}
+            >
+              {item.number}
+            </div>
+          ))}
+        </div>
+
+        {/* Central Picking Area */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className={cn(
+            "w-32 h-32 rounded-full border-4 border-tambola-border",
+            "bg-gradient-primary flex items-center justify-center",
+            "shadow-golden transition-all duration-500",
+            isAnimating && "animate-golden-pulse scale-110"
+          )}>
+            <div className="text-center">
+              <div className="text-xs font-medium text-primary-foreground mb-1">
+                {currentNumber ? "Called" : "Next"}
+              </div>
+              <div className="text-2xl font-bold text-primary-foreground">
+                {currentNumber || "?"}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Number History Indicator */}
+        <div className="absolute top-4 right-4 text-sm text-muted-foreground">
+          {calledNumbers.size}/90
+        </div>
       </div>
       
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {currentNumber && (
+      {/* Current Number Display */}
+      {currentNumber && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="bg-gradient-primary text-primary-foreground px-8 py-4 rounded-lg shadow-golden animate-number-reveal text-4xl font-bold">
             {currentNumber}
           </div>
-        )}
-      </div>
+        </div>
+      )}
       
+      {/* Pick Number Button */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 pointer-events-auto">
         <button
           onClick={onPickNumber}
@@ -112,45 +110,3 @@ export const NumberPicker3D: React.FC<NumberPicker3DProps> = ({
     </div>
   );
 };
-
-const Scene: React.FC<{ 
-  currentNumber: number | null; 
-  rotationSpeed: number;
-  calledNumbers: Set<number>;
-}> = ({ currentNumber, rotationSpeed, calledNumbers }) => {
-  const groupRef = useRef<THREE.Group>(null);
-  
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += rotationSpeed;
-    }
-  });
-
-  // Create a sphere of numbers around the current number
-  const sphereNumbers = Array.from({ length: 12 }, (_, i) => {
-    const angle = (i / 12) * Math.PI * 2;
-    const radius = 4;
-    const x = Math.cos(angle) * radius;
-    const z = Math.sin(angle) * radius;
-    const y = (Math.random() - 0.5) * 2;
-    
-    const number = Math.floor(Math.random() * 90) + 1;
-    return { number, position: [x, y, z] as [number, number, number] };
-  });
-
-  return (
-    <group ref={groupRef}>
-      {sphereNumbers.map((item, index) => (
-        <NumberBall
-          key={index}
-          number={item.number}
-          isActive={item.number === currentNumber}
-          position={item.position}
-        />
-      ))}
-    </group>
-  );
-};
-
-// Helper import for cn function
-import { cn } from '@/lib/utils';
