@@ -26,7 +26,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -61,7 +62,29 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				tambola: {
+					ticket: 'hsl(var(--ticket-background))',
+					border: 'hsl(var(--ticket-border))',
+					cell: 'hsl(var(--number-cell))',
+					called: 'hsl(var(--number-called))',
+					pending: 'hsl(var(--number-pending))'
 				}
+			},
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-secondary': 'var(--gradient-secondary)',
+				'gradient-background': 'var(--gradient-background)',
+				'gradient-card': 'var(--gradient-card)'
+			},
+			boxShadow: {
+				'golden': 'var(--shadow-golden)',
+				'card': 'var(--shadow-card)',
+				'glow': 'var(--glow-primary)'
+			},
+			transitionTimingFunction: {
+				'smooth': 'var(--transition-smooth)',
+				'bounce': 'var(--transition-bounce)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -70,25 +93,48 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
+				},
+				'number-reveal': {
+					'0%': { transform: 'scale(0) rotateY(180deg)', opacity: '0' },
+					'50%': { transform: 'scale(1.2) rotateY(90deg)', opacity: '0.7' },
+					'100%': { transform: 'scale(1) rotateY(0deg)', opacity: '1' }
+				},
+				'ticket-appear': {
+					'0%': { transform: 'translateY(50px) scale(0.8)', opacity: '0' },
+					'100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
+				},
+				'golden-pulse': {
+					'0%, 100%': { boxShadow: '0 0 20px hsl(45 100% 55% / 0.3)' },
+					'50%': { boxShadow: '0 0 40px hsl(45 100% 55% / 0.6)' }
+				},
+				'bounce-in': {
+					'0%': { transform: 'scale(0.3)', opacity: '0' },
+					'50%': { transform: 'scale(1.05)' },
+					'70%': { transform: 'scale(0.9)' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
+				},
+				'celebration': {
+					'0%': { transform: 'scale(1) rotate(0deg)' },
+					'25%': { transform: 'scale(1.1) rotate(-5deg)' },
+					'50%': { transform: 'scale(1.2) rotate(5deg)' },
+					'75%': { transform: 'scale(1.1) rotate(-5deg)' },
+					'100%': { transform: 'scale(1) rotate(0deg)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'number-reveal': 'number-reveal 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+				'ticket-appear': 'ticket-appear 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+				'golden-pulse': 'golden-pulse 2s ease-in-out infinite',
+				'bounce-in': 'bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+				'celebration': 'celebration 0.6s ease-in-out'
 			}
 		}
 	},
