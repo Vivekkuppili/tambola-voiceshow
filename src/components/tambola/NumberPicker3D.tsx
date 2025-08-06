@@ -41,7 +41,6 @@ const NumberBall: React.FC<NumberBallProps> = ({ number, isActive, position }) =
         color={isActive ? "#000000" : "#FFFFFF"}
         anchorX="center"
         anchorY="middle"
-        font="/fonts/Inter-Bold.woff"
       >
         {number.toString()}
       </Text>
